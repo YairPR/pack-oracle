@@ -1,4 +1,4 @@
 pack-oracle
 ===========
 
-Shinken configuration pack for MongoDB databases
+Shinken configuration pack for Oracle Databases
