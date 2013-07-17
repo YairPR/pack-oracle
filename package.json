@@ -18,7 +18,9 @@
 	"repository": "https://github.com/shinken-monitoring/pack-oracle",
 	"keywords": [
 	  "pack",
-	  
+	  "oracle",
+	  "database",
+	  "sql"
 	],
 	"dependencies": {
 	  "shinken": ">=1.4"
