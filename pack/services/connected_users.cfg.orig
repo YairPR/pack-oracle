@@ -10,4 +10,8 @@ define service{
    duplicate_foreach	  _databases
    aggregation		  /oracle/$KEY$/connectivity
    business_impact        2
+
+   _DETAILLEDESC          Number of users connected
+   _IMPACT                Average: Performance lowered.
+   _FIXACTIONS            Seek
 }
