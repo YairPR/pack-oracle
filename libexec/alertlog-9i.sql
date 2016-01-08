@@ -1,3 +1,13 @@
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT TO ANOTHER DEDICATED ACCOUNT --
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT TO ANOTHER DEDICATED ACCOUNT --
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT TO ANOTHER DEDICATED ACCOUNT --
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT TO ANOTHER DEDICATED ACCOUNT --
+---------------------------------------------------------------
+
 DECLARE
   BDumpDir VARCHAR2(200);
   SID VARCHAR2(16);
@@ -11,9 +21,11 @@ BEGIN
   WHERE name='background_dump_dest';
   -- create the directory for the bdump dir
   EXECUTE IMMEDIATE 'CREATE OR REPLACE DIRECTORY bdump_dir AS '''||BDumpDir||'''';
-  -- grant the necessary privileges
+  -- grant the necessary privileges 
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT HERE --
+---------------------------------------------------------------
   EXECUTE IMMEDIATE 'GRANT READ ON DIRECTORY bdump_dir TO system';
-  EXECUTE IMMEDIATE 'GRANT READ ON DIRECTORY bdump_dir TO admys';
   -- get the SID
   SELECT instance_name INTO SID FROM v$instance;
   -- create the external table
@@ -31,7 +43,10 @@ FIELDS MISSING FIELD VALUES ARE NULL
 LOCATION (''alert_'||SID||'.log'')
 )
 REJECT LIMIT UNLIMITED';
-    EXECUTE IMMEDIATE 'GRANT SELECT ON system.alert_log_external TO admys';
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT HERE --
+---------------------------------------------------------------
+    EXECUTE IMMEDIATE 'GRANT SELECT ON system.alert_log_external TO system';
 -- ignore ORA-955 errors (object already exists)
 EXCEPTION WHEN ObjectExists THEN NULL;
 END;
@@ -100,7 +115,11 @@ EXCEPTION WHEN ObjectExists THEN
   EXECUTE IMMEDIATE 'DROP PUBLIC SYNONYM alert_log';
   EXECUTE IMMEDIATE
       'CREATE PUBLIC SYNONYM alert_log FOR system.alert_log';
-  EXECUTE IMMEDIATE 'GRANT SELECT ON alert_log TO admys';
+---------------------------------------------------------------
+-- PLEASE CHANGE SYSTEM ACCOUNT HERE --
+---------------------------------------------------------------
+    EXECUTE IMMEDIATE 'GRANT SELECT ON system.alert_log_external TO system';
+  EXECUTE IMMEDIATE 'GRANT SELECT ON alert_log TO system';
 END;
 /
 
