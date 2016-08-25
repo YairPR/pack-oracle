@@ -1,7 +1,7 @@
 {
 	"name": "oracle",
 	"types": ["pack"],
-	"version": "1.4",
+	"version": "2.4",
 	"homepage": "https://github.com/shinken-monitoring/pack-oracle",
 	"author": "Jean Gabes",
 	"description": "Oracle database checks, like connected users, locks or data size",

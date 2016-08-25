@@ -28,7 +28,7 @@ WARNING = 1
 CRITICAL = 2
 UNKNOWN = 3
 
-VERSION = '0.9'
+VERSION = '1.0'
 
 class OracleDB():
 
