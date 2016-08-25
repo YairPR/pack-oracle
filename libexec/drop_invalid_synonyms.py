@@ -28,7 +28,7 @@ WARNING = 1
 CRITICAL = 2
 UNKNOWN = 3
 
-VERSION = '1.0'
+VERSION = '0.9'
 
 class OracleDB():
 
@@ -84,7 +84,10 @@ class OracleDB():
             print e
             sys.exit('Error on request execution')
 
-        return cursor.fetchall()
+			try:
+				return cursor.fetchall()
+			except cx_Oracle.InterfaceError as e:
+				pass
 
     def get_synonyms2drop(self, session):
         '''
@@ -92,9 +95,8 @@ class OracleDB():
         session : session object connected to the database.
         '''
 
-        request_private = 'SELECT \'DROP SYNONYM \'||DS.OWNER||\'.\'||DS.SYNONYM_NAME||\';\' FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER NOT IN (\'SYS\',\'PUBLIC\') AND DS.TABLE_OWNER NOT IN (\'SYS\',\'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
-        request_public = 'SELECT \'DROP PUBLIC SYNONYM \'||DS.SYNONYM_NAME||\';\' FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER = \'PUBLIC\' AND DS.TABLE_OWNER NOT IN (\'SYS\', \'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
-
+        request_private = 'SELECT \'DROP SYNONYM \'||DS.OWNER||\'.\'||DS.SYNONYM_NAME FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER NOT IN (\'SYS\',\'PUBLIC\') AND DS.TABLE_OWNER NOT IN (\'SYS\',\'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
+        request_public = 'SELECT \'DROP PUBLIC SYNONYM \'||OBJECT_NAME FROM dba_objects WHERE status = \'INVALID\' AND object_name NOT LIKE \'BIN$%\'AND object_type = \'SYNONYM\'AND owner NOT IN (\'SYS\', \'SYSTEM\')'
         invalid_private_synonyms = self.execute_request(session, request_private)
         invalid_public_synonyms = self.execute_request(session, request_public)
 
