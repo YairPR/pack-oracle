@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-############################## drop_invalid_synonyms.py #################
+############################## check_snmp_load #################
 # Version : 0.9
-# Date : Jui 13 2016
+# Date : Oct 29 2013
 # Author  : Romain Forlot ( rforlot[At] yahoo [dot] com )
 # Help : http://blog.claneys.com
 # Licence : GPL - http://www.fsf.org/licenses/gpl.txt
@@ -84,10 +84,7 @@ class OracleDB():
             print e
             sys.exit('Error on request execution')
 
-        try:
-            return cursor.fetchall()
-        except:
-            return []
+        return cursor.fetchall()
 
     def get_synonyms2drop(self, session):
         '''
@@ -95,16 +92,14 @@ class OracleDB():
         session : session object connected to the database.
         '''
 
-        request_private_synonyms = 'SELECT \'DROP SYNONYM \'||OWNER||\'.\'||OBJECT_NAME FROM dba_objects WHERE status = \'INVALID\' AND object_name NOT LIKE \'BIN$%\' AND object_type = \'SYNONYM\' AND owner NOT IN (\'SYS\',\'PUBLIC\', \'SYSTEM\')'
-#'SELECT \'DROP SYNONYM \'||DS.OWNER||\'.\'||DS.SYNONYM_NAME FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER NOT IN (\'SYS\',\'PUBLIC\') AND DS.TABLE_OWNER NOT IN (\'SYS\',\'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
-        request_public_synonyms = 'SELECT \'DROP PUBLIC SYNONYM \'||OBJECT_NAME FROM dba_objects WHERE status = \'INVALID\' AND object_name NOT LIKE \'BIN$%\' AND object_type = \'SYNONYM\' AND owner NOT IN (\'SYS\', \'SYSTEM\')'
-#'SELECT \'DROP PUBLIC SYNONYM \'||DS.SYNONYM_NAME FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER = \'PUBLIC\' AND DS.TABLE_OWNER NOT IN (\'SYS\', \'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
+        request_private = 'SELECT \'DROP SYNONYM \'||DS.OWNER||\'.\'||DS.SYNONYM_NAME||\';\' FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER NOT IN (\'SYS\',\'PUBLIC\') AND DS.TABLE_OWNER NOT IN (\'SYS\',\'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
+        request_public = 'SELECT \'DROP PUBLIC SYNONYM \'||DS.SYNONYM_NAME||\';\' FROM DBA_SYNONYMS DS, DBA_OBJECTS DO WHERE DS.TABLE_OWNER = DO.OWNER(+) AND DO.OWNER IS NULL AND DS.TABLE_NAME = DO.OBJECT_NAME(+) AND DO.OBJECT_NAME IS NULL AND DS.OWNER = \'PUBLIC\' AND DS.TABLE_OWNER NOT IN (\'SYS\', \'SYSTEM\') AND DS.DB_LINK IS NULL ORDER BY DS.TABLE_OWNER, DS.TABLE_NAME'
 
-        invalid_private_synonyms = self.execute_request(session, request_private_synonyms)
-        invalid_public_synonyms = self.execute_request(session, request_public_synonyms)
-        
+        invalid_private_synonyms = self.execute_request(session, request_private)
+        invalid_public_synonyms = self.execute_request(session, request_public)
+
         requests = []
-        
+
         for request in invalid_private_synonyms:
            requests.append(request[0])
         for request in invalid_public_synonyms:
@@ -121,16 +116,13 @@ class OracleDB():
 
         synonyms2drop_requests = self.get_synonyms2drop(session)
 
-        fh = open('/tmp/drop_synonyms.log', 'a')
         for request in synonyms2drop_requests:
-            if not re.search('DROP (PUBLIC )?SYNONYM', request):
+            if not request.startswith('DROP SYNONYM') and not request.startswith('DROP PUBLIC SYNONYM'):
                 print('Very wrong request trying to be executed : %s.' % request )
                 exit(CRITICAL)
             
-            print('%s' % str(request))
-            fh.write('Dropping %s\n' % request.split(' ')[-1])
+            print('Dropping %s' % request.split(' ')[2])
             self.execute_request(session, request)
-        fh.close()
 
     def main(self):
         if self.service_state == 'CRITICAL' or self.service_state == 'WARNING':
