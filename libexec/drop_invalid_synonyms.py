@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-############################## check_snmp_load #################
-# Version : 0.9
-# Date : Oct 29 2013
+############################## drop_invalid_synonyms #################
+# Version : 1.0
+# Date : Jun 29 2016
 # Author  : Romain Forlot ( rforlot[At] yahoo [dot] com )
 # Help : http://blog.claneys.com
 # Licence : GPL - http://www.fsf.org/licenses/gpl.txt
 #################################################################
 #
-# Help : ./check_SydelUnivers -c <connect_string> -u <database_username> -p <database_username_password> -w <warning threshold>
+# Help : ./drop_invalid_synonyms.py -c <connect-string> -u <oracle_user> -p <oracle_password> -s <$SERVICESTATE$ macro> -t <$SERVICESTATETYPE$ macro>
 #
-# This plugin check alarms triggered for a specific user and return them. There are no critical threshold since SU handle 
-# that state.
+# This plugin is meant to be used with Oracle-invalid-objects service 
+# which at CRITICAL SOFT state will seek and drop invalid synonyms in db
 
 import os, re, sys
 
@@ -28,7 +28,7 @@ WARNING = 1
 CRITICAL = 2
 UNKNOWN = 3
 
-VERSION = '0.9'
+VERSION = '1.0'
 
 class OracleDB():
 
